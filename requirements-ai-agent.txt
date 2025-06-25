@@ -1,0 +1,34 @@
+# Основные зависимости
+fastapi>=0.95.0
+uvicorn[standard]>=0.21.0
+pydantic>=1.10.0
+python-dotenv>=0.21.0
+
+# Для работы с моделями ИИ
+torch>=1.13.0
+transformers>=4.24.0
+sentence-transformers>=2.2.2
+accelerate>=0.15.0
+bitsandbytes>=0.39.0
+
+# Асинхронность и очереди
+redis>=4.5.0
+rq>=1.14.0
+
+# Логирование
+loguru>=0.6.0
+
+# Утилиты
+python-ulid>=2.2.0
+pydantic>=1.10.0
+
+# API клиент
+httpx>=0.23.0
+
+# Обработка данных
+numpy>=1.23.0
+pandas>=1.5.0
+
+# Тестирование
+pytest>=7.3.1
+pytest-asyncio>=0.20.3

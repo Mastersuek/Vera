@@ -1,0 +1,363 @@
+
+
+=== .gitignore ===
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# UV
+.uv/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+*.log
+*.enc
+/logs/
+/secure_data/
+/models/
+.env.local
+.env.production
+
+# Docker
+.dockerignore
+
+# Certificates
+*.pem
+*.key
+*.crt
+ssl/
+
+# Temporary files
+tmp/
+temp/
+
+=== README.md ===
+# 🔮 Проект "Вера" - AI-powered Data Science Platform
+
+[![CI/CD Pipeline](https://github.com/Mastersuek/Vera/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/Mastersuek/Vera/actions/workflows/ci-cd.yml)
+[![Security Audit](https://github.com/Mastersuek/Vera/actions/workflows/security-audit.yml/badge.svg)](https://github.com/Mastersuek/Vera/actions/workflows/security-audit.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## 🎯 Описание
+
+Проект "Вера" - это комплексная AI-powered платформа для Data Science с встроенными протоколами безопасности и защиты данных.
+
+### ✨ Основные возможности
+
+- 🤖 **AI-анализ данных** с использованием современных ML алгоритмов
+- 🛡️ **DLP (Data Loss Prevention)** - защита от утечек чувствительных данных
+- 🌐 **Безопасный прокси** с фильтрацией контента
+- 🔐 **Шифрование данных** (AES-256)
+- 📊 **Мониторинг и аудит** всех операций
+- ⚡ **Быстрая установка** с UV package manager
+
+## 🚀 Быстрый старт
+
+### Установка UV
+
+```bash
+# Linux/macOS
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Windows
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+### Клонирование и запуск
+
+```bash
+# Клонирование репозитория
+git clone https://github.com/Mastersuek/Vera.git
+cd Vera
+
+# Настройка переменных окружения
+cp .env.example .env
+# Отредактируйте .env файл
+
+# Запуск через Docker Compose
+docker-compose up -d
+
+# Или запуск отдельных сервисов для разработки
+cd vera-core && uv run python vera_main.py &
+cd vera-proxy && uv run python advanced_proxy.py &
+cd vera-dlp && uv run python advanced_dlp.py &
+```
+
+## 📚 Документация
+
+- [📖 Руководство по развертыванию](docs/deployment-guide.md)
+- [🔒 Руководство по безопасности](docs/security-guide.md)
+- [🛠️ API документация](docs/api-reference.md)
+- [❓ FAQ и устранение неполадок](docs/troubleshooting.md)
+
+## 🛠️ Разработка
+
+### Структура проекта
+
+```
+Vera/
+├── vera-core/              # Основное AI приложение
+│   ├── vera_main.py
+│   ├── pyproject.toml
+│   └── Dockerfile
+├── vera-proxy/             # Безопасный прокси
+│   ├── advanced_proxy.py
+│   ├── pyproject.toml
+│   └── Dockerfile
+├── vera-dlp/               # DLP система
+│   ├── advanced_dlp.py
+│   ├── pyproject.toml
+│   └── Dockerfile
+├── .github/workflows/      # CI/CD пайплайны
+├── configs/                # Конфигурации сервисов
+├── docs/                   # Документация
+└── docker-compose.prod.yml # Production развертывание
+```
+
+## 🔒 Безопасность
+
+### Основные принципы
+
+- ✅ **Zero Trust Architecture** - никому не доверяем по умолчанию
+- ✅ **Defense in Depth** - многоуровневая защита
+- ✅ **Least Privilege** - минимальные необходимые права
+- ✅ **Audit Everything** - полное логирование действий
+
+## 📜 Лицензия
+
+Этот проект распространяется под лицензией MIT. См. файл [LICENSE](LICENSE) для подробностей.
+
+---
+
+**🔮 Добро пожаловать в проект "Вера" - где безопасность встречается с AI!**
+
+=== vera-core/vera_main.py ===
+#!/usr/bin/env python3
+"""
+Проект "Вера" - Основное приложение
+AI-powered Data Science платформа с протоколом безопасности
+"""
+
+import asyncio
+import json
+import logging
+import os
+import sys
+import time
+import uuid
+from contextlib import asynccontextmanager
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Union
+
+import httpx
+import numpy as np
+import pandas as pd
+from cryptography.fernet import Fernet
+from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from pydantic import BaseModel, Field
+from sklearn.cluster import KMeans, DBSCAN
+from sklearn.decomposition import PCA
+from sklearn.ensemble import IsolationForest, RandomForestClassifier
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.manifold import TSNE
+from sklearn.metrics import silhouette_score
+from sklearn.preprocessing import StandardScaler
+import uvicorn
+
+# Конфигурация
+DLP_SERVICE_URL = os.getenv("VERA_DLP_URL", "http://vera-dlp:8081")
+PROXY_SERVICE_URL = os.getenv("VERA_PROXY_URL", "http://vera-proxy:8080")
+ENCRYPTION_KEY = os.getenv("VERA_ENCRYPTION_KEY", Fernet.generate_key())
+
+# Создание FastAPI приложения
+app = FastAPI(
+    title="Проект \"Вера\"",
+    description="AI-powered Data Science платформа с протоколом безопасности",
+    version="1.0.0"
+)
+
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    return HTMLResponse(content="""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Проект "Вера"</title>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <h1>🔮 Проект "Вера"</h1>
+        <p>AI-powered Data Science платформа с протоколом безопасности</p>
+    </body>
+    </html>
+    """)
+
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat(),
+        "service": "vera-core",
+        "version": "1.0.0"
+    }
+
+if __name__ == "__main__":
+    uvicorn.run(
+        "vera_main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=False,
+        access_log=True,
+        log_level="info"
+    )
+
+=== vera-core/pyproject.toml ===
+[project]
+name = "vera-core"
+version = "1.0.0"
+description = "Vera Core - AI-powered Data Science platform"
+requires-python = ">=3.10"
+
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "httpx>=0.25.0",
+    "pandas>=2.1.0",
+    "numpy>=1.24.0",
+    "scikit-learn>=1.3.0",
+    "cryptography>=41.0.0",
+    "pydantic>=2.5.0",
+    "python-dotenv>=1.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+=== docker-compose.yml ===
+version: '3.8'
+
+services:
+  vera-core:
+    build: ./vera-core
+    ports:
+      - "8000:8000"
+    environment:
+      - VERA_ENV=development
+      - VERA_DLP_URL=http://vera-dlp:8081
+      - VERA_PROXY_URL=http://vera-proxy:8080
+    depends_on:
+      - vera-dlp
+      - vera-proxy
+
+  vera-proxy:
+    build: ./vera-proxy
+    ports:
+      - "8080:8080"
+    environment:
+      - VERA_ENV=development
+      - VERA_DLP_URL=http://vera-dlp:8081
+    depends_on:
+      - vera-dlp
+
+  vera-dlp:
+    build: ./vera-dlp
+    ports:
+      - "8081:8081"
+    environment:
+      - VERA_ENV=development
+
+=== scripts/setup.sh ===
+#!/bin/bash
+set -e
+
+echo "🔮 Настройка проекта Вера..."
+
+# Проверка UV
+if ! command -v uv &> /dev/null; then
+    echo "Установка UV..."
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+fi
+
+# Создание .env файла
+if [ ! -f .env ]; then
+    cp .env.example .env
+    echo "✅ Создан файл .env из примера"
+fi
+
+# Установка зависимостей для всех сервисов
+for service in vera-core vera-proxy vera-dlp; do
+    echo "Установка зависимостей для $service..."
+    cd $service
+    uv sync --dev
+    cd ..
+done
+
+echo "🎉 Настройка завершена!"
+
+=== .env.example ===
+# Production Environment Variables для проекта "Вера"
+
+# Основные секретные ключи
+VERA_SECRET_KEY=your-super-secret-key-change-this-in-production
+VERA_ENCRYPTION_KEY=your-base64-encoded-encryption-key-change-this
+VERA_ACCESS_KEY=vera-access-2024-change-this
+
+# Базы данных
+POSTGRES_PASSWORD=secure-postgres-password-change-this
+POSTGRES_USER=vera
+POSTGRES_DB=vera
+REDIS_PASSWORD=secure-redis-password-change-this
+
+# Основные настройки
+VERA_ENV=production
+IMAGE_BASE=ghcr.io/mastersuek/vera
+IMAGE_TAG=latest
+
+# DLP и безопасность
+RISK_THRESHOLD=15
+VERA_ENCRYPTION_LEVEL=high
+VERA_DLP_ENABLED=true
+VERA_AUDIT_MODE=strict

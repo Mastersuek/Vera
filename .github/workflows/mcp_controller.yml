@@ -48,19 +48,25 @@ jobs:
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
 
-    - name: Set up environment
-      id: set-env
+    - name: Set task parameters
+      id: set_params
       run: |
-        # Устанавливаем TASK_TYPE из входных данных или используем значение по умолчанию
-        if [[ -n "${{ github.event.inputs.task_type }}" ]]; then
+        # Устанавливаем тип задачи
+        if [ -z "${{ github.event.inputs.task_type }}" ] && [ "${{ github.event_name }}" = "schedule" ]; then
+          echo "TASK_TYPE=scheduled" >> $GITHUB_ENV
+        elif [ -n "${{ github.event.inputs.task_type }}" ]; then
           echo "TASK_TYPE=${{ github.event.inputs.task_type }}" >> $GITHUB_ENV
+        elif [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+          echo "TASK_TYPE=${{ github.event.client_payload.task_type || 'process' }}" >> $GITHUB_ENV
         else
           echo "TASK_TYPE=process" >> $GITHUB_ENV
         fi
         
-        # Устанавливаем TASK_PARAMS из входных данных или используем значение по умолчанию
-        if [[ -n "${{ github.event.inputs.task_params }}" ]]; then
+        # Устанавливаем параметры задачи
+        if [ -n "${{ github.event.inputs.task_params }}" ]; then
           echo "TASK_PARAMS='${{ github.event.inputs.task_params }}'" >> $GITHUB_ENV
+        elif [ "${{ github.event_name }}" = "repository_dispatch" ] && [ -n "${{ github.event.client_payload.task_params }}" ]; then
+          echo "TASK_PARAMS='${{ toJSON(github.event.client_payload.task_params) }}'" >> $GITHUB_ENV
         else
           echo "TASK_PARAMS='{}'" >> $GITHUB_ENV
         fi
@@ -69,12 +75,15 @@ jobs:
       id: mcp_task
       env:
         PYTHONPATH: ${{ github.workspace }}
+        # Безопасное использование переменных окружения
+        TASK_TYPE: ${{ env.TASK_TYPE || 'process' }}
+        TASK_PARAMS: ${{ env.TASK_PARAMS || '{}' }}
       run: |
-        echo "Запуск задачи MCP: ${{ env.TASK_TYPE }}"
-        echo "Параметры: ${{ env.TASK_PARAMS }}"
+        echo "Запуск задачи MCP: $TASK_TYPE"
+        echo "Параметры: $TASK_PARAMS"
         
         # Здесь будет вызов вашего скрипта обработки задач
-        # python -m app.mcp.controller --task-type "${{ env.TASK_TYPE }}" --params "${{ env.TASK_PARAMS }}"
+        # python -m app.mcp.controller --task-type "$TASK_TYPE" --params "$TASK_PARAMS"
         
         # Пример вывода результата
         echo "status=success" >> $GITHUB_OUTPUT
@@ -93,7 +102,7 @@ jobs:
         fi
 
     - name: Send notification
-      if: always() && github.event_name != 'schedule'  # Не отправлять уведомления для запланированных задач
+      if: always() && github.event_name != 'schedule' && github.event_name != 'workflow_dispatch'  # Не отправлять уведомления для запланированных и ручных задач
       uses: rtCamp/action-slack-notify@v2
       env:
         SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL || '' }}

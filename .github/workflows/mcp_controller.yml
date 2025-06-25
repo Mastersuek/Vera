@@ -20,6 +20,12 @@ on:
   schedule:
     - cron: '0 0 * * *'
 
+# Глобальные переменные окружения
+env:
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL || '' }}
+  DEFAULT_TASK_TYPE: 'process'
+  DEFAULT_TASK_PARAMS: '{}'
+
 jobs:
   process-task:
     runs-on: ubuntu-latest
@@ -50,25 +56,31 @@ jobs:
 
     - name: Set task parameters
       id: set_params
+      env:
+        # Определяем тип задачи
+        INPUT_TASK_TYPE: ${{ github.event.inputs.task_type || '' }}
+        INPUT_TASK_PARAMS: ${{ github.event.inputs.task_params || '{}' }}
+        DISPATCH_TASK_TYPE: ${{ github.event.client_payload.task_type || '' }}
+        DISPATCH_TASK_PARAMS: ${{ toJSON(github.event.client_payload.task_params) || '{}' }}
       run: |
         # Устанавливаем тип задачи
-        if [ -z "${{ github.event.inputs.task_type }}" ] && [ "${{ github.event_name }}" = "schedule" ]; then
+        if [[ -n "$INPUT_TASK_TYPE" ]]; then
+          echo "TASK_TYPE=$INPUT_TASK_TYPE" >> $GITHUB_ENV
+        elif [[ "${{ github.event_name }}" == "repository_dispatch" && -n "$DISPATCH_TASK_TYPE" ]]; then
+          echo "TASK_TYPE=$DISPATCH_TASK_TYPE" >> $GITHUB_ENV
+        elif [[ "${{ github.event_name }}" == "schedule" ]]; then
           echo "TASK_TYPE=scheduled" >> $GITHUB_ENV
-        elif [ -n "${{ github.event.inputs.task_type }}" ]; then
-          echo "TASK_TYPE=${{ github.event.inputs.task_type }}" >> $GITHUB_ENV
-        elif [ "${{ github.event_name }}" = "repository_dispatch" ]; then
-          echo "TASK_TYPE=${{ github.event.client_payload.task_type || 'process' }}" >> $GITHUB_ENV
         else
-          echo "TASK_TYPE=process" >> $GITHUB_ENV
+          echo "TASK_TYPE=$DEFAULT_TASK_TYPE" >> $GITHUB_ENV
         fi
         
         # Устанавливаем параметры задачи
-        if [ -n "${{ github.event.inputs.task_params }}" ]; then
-          echo "TASK_PARAMS='${{ github.event.inputs.task_params }}'" >> $GITHUB_ENV
-        elif [ "${{ github.event_name }}" = "repository_dispatch" ] && [ -n "${{ github.event.client_payload.task_params }}" ]; then
-          echo "TASK_PARAMS='${{ toJSON(github.event.client_payload.task_params) }}'" >> $GITHUB_ENV
+        if [[ -n "$INPUT_TASK_PARAMS" && "$INPUT_TASK_PARAMS" != "{}" ]]; then
+          echo "TASK_PARAMS='$INPUT_TASK_PARAMS'" >> $GITHUB_ENV
+        elif [[ "${{ github.event_name }}" == "repository_dispatch" && -n "$DISPATCH_TASK_PARAMS" && "$DISPATCH_TASK_PARAMS" != "{}" ]]; then
+          echo "TASK_PARAMS='$DISPATCH_TASK_PARAMS'" >> $GITHUB_ENV
         else
-          echo "TASK_PARAMS='{}'" >> $GITHUB_ENV
+          echo "TASK_PARAMS='$DEFAULT_TASK_PARAMS'" >> $GITHUB_ENV
         fi
 
     - name: Run MCP Task
@@ -76,8 +88,8 @@ jobs:
       env:
         PYTHONPATH: ${{ github.workspace }}
         # Безопасное использование переменных окружения
-        TASK_TYPE: ${{ env.TASK_TYPE || 'process' }}
-        TASK_PARAMS: ${{ env.TASK_PARAMS || '{}' }}
+        TASK_TYPE: ${{ env.TASK_TYPE || env.DEFAULT_TASK_TYPE }}
+        TASK_PARAMS: ${{ env.TASK_PARAMS || env.DEFAULT_TASK_PARAMS }}
       run: |
         echo "Запуск задачи MCP: $TASK_TYPE"
         echo "Параметры: $TASK_PARAMS"
@@ -102,10 +114,10 @@ jobs:
         fi
 
     - name: Send notification
-      if: always() && github.event_name != 'schedule' && github.event_name != 'workflow_dispatch'  # Не отправлять уведомления для запланированных и ручных задач
+      if: always() && github.event_name != 'schedule' && github.event_name != 'workflow_dispatch' && env.SLACK_WEBHOOK_URL != ''
       uses: rtCamp/action-slack-notify@v2
       env:
-        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL || '' }}
+        SLACK_WEBHOOK: ${{ env.SLACK_WEBHOOK_URL }}
         SLACK_CHANNEL: '#mcp-notifications'
         SLACK_TITLE: "MCP Task ${{ job.status }}"
         SLACK_MESSAGE: |

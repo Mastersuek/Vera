@@ -20,12 +20,13 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --no-cache-dir -r requirements.txt
 
 # ===== RUNTIME STAGE =====
-FROM python:3.10-slim
+FROM python:3.10-slim as production
 
 # Install runtime dependencies
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt-get update && apt-get install -y --no-install-recommends \
+    curl \
     libpq5 \
     && rm -rf /var/lib/apt/lists/*
 
@@ -42,7 +43,7 @@ WORKDIR /app
 USER appuser
 
 # Copy application code
-COPY --chown=appuser:appuser . .
+COPY --chown=appuser:appuser ./app ./app
 
 # Environment variables
 ENV PYTHONUNBUFFERED=1 \
@@ -51,7 +52,7 @@ ENV PYTHONUNBUFFERED=1 \
     PATH="/opt/venv/bin:$PATH"
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
 # Expose port

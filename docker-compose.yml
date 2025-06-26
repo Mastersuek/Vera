@@ -135,8 +135,6 @@ services:
 networks:
   vera-network:
     driver: bridge
-    driver_opts:
-      encrypted: ''
 
 volumes:
   postgres_data:

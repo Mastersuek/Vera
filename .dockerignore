@@ -1,49 +1,76 @@
-.env
-.git.git
+# Git
+.git
+.gitignore
+.gitmodules
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
 .venv
-.vscode
-__pycache__
-*.env
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
 *.log
+
+# Local development
+.venv/
+
+# Project specific
+uploads/
+*.db
+*.sqlite3
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
 .docker-cache/
 .docker-cache-new/
 uploads/
---- a/d:\Bots\Vera\README.md
-+++ b/d:\Bots\Vera\README.md
-@@ -31,26 +31,22 @@
-    ```
- 
- 3. **Запустите приложение**
--   ```bash
--   # Сборка и запуск
--   ./build.sh
--   
--   # Или вручную
--   docker compose up -d
--   ```
-+   Для сборки, тестирования и сканирования уязвимостей выполните:
-+   ```bash
-+   ./build.sh
-+   ```
-+   После успешной сборки, запустите сервисы в фоновом режиме:
-+   ```bash
-+   docker compose up -d
-+   ```
- 
--### Запуск
-+### Остановка
-+   ```bash
-+   docker compose down
-+   ```
- 
--```bash
--# Запуск основного приложения
--uvicorn app.main:app --reload
--
--# Или с помощью Docker
--docker-compose up --build
--```
--
- ## 🧪 Запуск тестов
- 
- ```bash
+# Local configuration
+local_settings.py
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

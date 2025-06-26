@@ -18,6 +18,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - PYTHONDONTWRITEBYTECODE=1
+      - QDRANT_URL=http://qdrant:6333
     volumes:
       - ./app:/app/app
       - ./uploads:/app/uploads
@@ -28,6 +29,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      qdrant:
+        condition: service_started # Qdrant doesn't have a simple healthcheck
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -132,6 +135,19 @@ services:
     networks:
       - vera-network
 
+  # Векторная база данных Qdrant
+  qdrant:
+    image: qdrant/qdrant:v1.7.4
+    container_name: vera-qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - vera-network
+
 networks:
   vera-network:
     driver: bridge
@@ -142,4 +158,6 @@ volumes:
   redis_data:
     driver: local
   pgadmin_data:
+    driver: local
+  qdrant_data:
     driver: local

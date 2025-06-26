@@ -1,9 +1,13 @@
-.git
+.env
+.git.git
 .venv
 .vscode
 __pycache__
 *.env
 *.log
+.docker-cache/
+.docker-cache-new/
+uploads/
 --- a/d:\Bots\Vera\README.md
 +++ b/d:\Bots\Vera\README.md
 @@ -31,26 +31,22 @@

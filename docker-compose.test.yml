@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  test:
+    build:
+      context: .
+      target: builder
+      args:
+        - BUILDKIT_INLINE_CACHE=1
+    container_name: vera-test
+    env_file: .env.test
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TESTING=1
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: >
+      sh -c "pytest -v --cov=app --cov-report=term-missing"
+    depends_on:
+      test-db:
+        condition: service_healthy
+      test-redis:
+        condition: service_healthy
+    networks:
+      - test-network
+
+  test-db:
+    image: postgres:14-alpine
+    container_name: vera-test-db
+    environment:
+      - POSTGRES_USER=test
+      - POSTGRES_PASSWORD=test
+      - POSTGRES_DB=test
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test -d test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - test-db-data:/var/lib/postgresql/data
+    networks:
+      - test-network
+
+  test-redis:
+    image: redis:7-alpine
+    container_name: vera-test-redis
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - test-redis-data:/data
+    networks:
+      - test-network
+
+networks:
+  test-network:
+    driver: bridge
+
+volumes:
+  test-db-data:
+  test-redis-data:

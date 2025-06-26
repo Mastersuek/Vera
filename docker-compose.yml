@@ -19,9 +19,6 @@ services:
       - PYTHONUNBUFFERED=1
       - PYTHONDONTWRITEBYTECODE=1
       - QDRANT_URL=http://qdrant:6333
-    volumes:
-      - ./app:/app/app
-      - ./uploads:/app/uploads
     ports:
       - "8000:8000"
     depends_on:

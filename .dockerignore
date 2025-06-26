@@ -1,3 +1,6 @@
+# Docker
+Dockerfile
+.dockerignore
 # Git
 .git
 .gitignore
@@ -59,6 +62,7 @@ uploads/
 htmlcov/
 .pytest_cache/
 .tox/
+docker-compose.override.yml
 
 .docker-cache/
 .docker-cache-new/

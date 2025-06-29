@@ -19,11 +19,15 @@ body {
 /* Сайдбар */
 .sidebar {
     width: 250px;
+    min-height: 100vh;
     background: #2c3e50;
     color: white;
     padding: 20px;
     position: fixed;
-    height: 100vh;
+    left: 0;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
 }
 
 .logo {

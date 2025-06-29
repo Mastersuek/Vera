@@ -14,6 +14,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Инициализация обновлений
     initDashboardUpdates();
+
+    // Инициализация диалога отладки
+    const debugWindow = new DebugWindow();
 });
 
 // Настройка графиков

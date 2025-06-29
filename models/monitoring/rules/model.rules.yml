@@ -1,0 +1,62 @@
+groups:
+  - name: model_performance
+    rules:
+      - alert: ModelHighLatency
+        expr: |
+          histogram_quantile(0.95, sum(rate(model_request_duration_seconds_bucket[5m])) by (le)) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High latency for model requests"
+          description: "95th percentile of model request latency is above 1 second"
+
+      - alert: ModelErrorRateHigh
+        expr: |
+          rate(model_request_errors_total[5m]) / rate(model_requests_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate for model requests"
+          description: "More than 5% of requests are failing"
+
+      - alert: ModelMemoryUsageHigh
+        expr: |
+          process_resident_memory_bytes > 8 * 1024 * 1024 * 1024
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage"
+          description: "Model is using more than 8GB of memory"
+
+      - alert: ModelCPUUsageHigh
+        expr: |
+          rate(process_cpu_seconds_total[5m]) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage"
+          description: "Model is using more than 80% of CPU"
+
+      - alert: ModelResponseTimeSpike
+        expr: |
+          increase(model_request_duration_seconds_sum[5m]) / increase(model_request_duration_seconds_count[5m]) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Response time spike"
+          description: "Average response time has increased significantly"
+
+      - alert: ModelThroughputLow
+        expr: |
+          rate(model_requests_total[5m]) < 1
+        for: 15m
+        labels:
+          severity: info
+        annotations:
+          summary: "Low throughput"
+          description: "Model is processing less than 1 request per second"

@@ -229,6 +229,24 @@
                     </div>
                 </div>
             </div>
+            <!-- Диалоговое окно отладки -->
+            <div id="debug-modal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Отладка системы</h2>
+                        <button class="close-modal">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="debug-log" id="debug-log">
+                            <!-- Логи отладки будут добавляться динамически -->
+                        </div>
+                        <div class="debug-actions">
+                            <button class="btn-primary" id="run-tests">Запустить тесты</button>
+                            <button class="btn-secondary" id="clear-log">Очистить лог</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -237,6 +255,7 @@
         <script src="js/monitor.js"></script>
         <script src="js/file-upload.js"></script>
         <script src="js/pages.js"></script>
+        <script src="js/debug.js"></script>
         <script src="js/main.js"></script>
         <script src="js/dashboard.js"></script>
     </body>

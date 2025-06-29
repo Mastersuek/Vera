@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vera - AI Platform</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Сайдбар -->
+        <aside class="sidebar">
+            <div class="logo">
+                <img src="assets/logo.svg" alt="Vera Logo">
+                <span>Vera</span>
+            </div>
+            <nav class="nav-menu">
+                <a href="#dashboard" class="active"><i class="icon-dashboard"></i> Dashboard</a>
+                <a href="#tasks"><i class="icon-tasks"></i> Задачи</a>
+                <a href="#semantic"><i class="icon-semantic"></i> Семантика</a>
+                <a href="#monitoring"><i class="icon-monitor"></i> Мониторинг</a>
+                <a href="#admin"><i class="icon-settings"></i> Администрирование</a>
+            </nav>
+        </aside>
+
+        <!-- Основное содержимое -->
+        <main class="main-content">
+            <!-- Верхняя панель -->
+            <header class="top-bar">
+                <div class="top-bar-left">
+                    <h1 class="page-title">Dashboard</h1>
+                </div>
+                <div class="top-bar-right">
+                    <div class="traffic-lights">
+                        <div class="light red" id="error-light">
+                            <span class="light-dot"></span>
+                            <span>Сбой</span>
+                        </div>
+                        <div class="light yellow" id="warning-light">
+                            <span class="light-dot"></span>
+                            <span>Вычисления</span>
+                        </div>
+                        <div class="light green" id="ready-light">
+                            <span class="light-dot"></span>
+                            <span>Готов</span>
+                        </div>
+                    </div>
+                    <div class="user-profile">
+                        <img src="assets/user-avatar.png" alt="User">
+                        <span>Администратор</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Основное содержимое -->
+            <div class="main-content">
+                <!-- Содержимое страниц -->
+                <div class="page-content">
+                    <!-- Dashboard -->
+                    <section id="dashboard" class="page active">
+                        <!-- Монитор системной загрузки -->
+                        <div class="system-monitor">
+                            <h3>Системная загрузка</h3>
+                            <div class="monitor-container">
+                                <div class="monitor-chart" id="cpu-monitor">
+                                    <div class="chart-title">CPU</div>
+                                    <div class="chart-value">0%</div>
+                                    <div class="chart-peak">Пик: 0%</div>
+                                    <canvas id="cpu-canvas"></canvas>
+                                </div>
+                                <div class="monitor-chart" id="memory-monitor">
+                                    <div class="chart-title">Memory</div>
+                                    <div class="chart-value">0%</div>
+                                    <div class="chart-peak">Пик: 0%</div>
+                                    <canvas id="memory-canvas"></canvas>
+                                </div>
+                                <div class="monitor-chart" id="disk-monitor">
+                                    <div class="chart-title">Disk</div>
+                                    <div class="chart-value">0%</div>
+                                    <div class="chart-peak">Пик: 0%</div>
+                                    <canvas id="disk-canvas"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Загрузка файлов -->
+                        <div class="file-upload-section">
+                            <h3>Загрузка файлов</h3>
+                            <div class="upload-container">
+                                <div class="upload-area" id="upload-area">
+                                    <div class="upload-icon">
+                                        <i class="icon-upload"></i>
+                                    </div>
+                                    <p>Перетащите файлы сюда или нажмите для выбора</p>
+                                    <input type="file" id="file-input" multiple accept=".txt,.csv,.xlsx,.pdf,.jpg,.png,.mp3,.mp4,.wav">
+                                </div>
+                                <div class="uploaded-files" id="uploaded-files">
+                                    <!-- Файлы будут добавляться динамически -->
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Задачи -->
+                    <section id="tasks" class="page">
+                        <h2>Управление задачами</h2>
+                        <div class="tasks-container">
+                            <div class="task-actions">
+                                <button class="btn-primary" id="create-task">Создать задачу</button>
+                                <div class="task-filters">
+                                    <select id="task-status">
+                                        <option value="all">Все статусы</option>
+                                        <option value="pending">В ожидании</option>
+                                        <option value="running">Выполняется</option>
+                                        <option value="completed">Завершено</option>
+                                        <option value="failed">Ошибка</option>
+                                    </select>
+                                    <input type="text" id="task-search" placeholder="Поиск по задачам...">
+                                </div>
+                            </div>
+                            <div class="tasks-list" id="tasks-list">
+                                <!-- Задачи будут добавляться динамически -->
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Семантика -->
+                    <section id="semantic" class="page">
+                        <h2>Семантический анализ</h2>
+                        <div class="semantic-container">
+                            <div class="semantic-input">
+                                <textarea id="semantic-text" placeholder="Введите текст для анализа..."></textarea>
+                                <button class="btn-primary" id="analyze-text">Проанализировать</button>
+                            </div>
+                            <div class="semantic-results">
+                                <div class="semantic-visualization">
+                                    <!-- Визуализация будет добавлена динамически -->
+                                </div>
+                                <div class="semantic-metrics">
+                                    <h3>Метрики</h3>
+                                    <!-- Метрики будут добавлены динамически -->
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Мониторинг -->
+                    <section id="monitoring" class="page">
+                        <h2>Мониторинг системы</h2>
+                        <div class="monitoring-container">
+                            <div class="system-metrics">
+                                <h3>Системные метрики</h3>
+                                <!-- Метрики будут добавлены динамически -->
+                            </div>
+                            <div class="logs-section">
+                                <h3>Логи системы</h3>
+                                <div class="logs-container" id="logs-container">
+                                    <!-- Логи будут добавлены динамически -->
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Администрирование -->
+                    <section id="admin" class="page">
+                        <h2>Администрирование</h2>
+                        <div class="admin-container">
+                            <div class="admin-settings">
+                                <h3>Настройки системы</h3>
+                                <!-- Настройки будут добавлены динамически -->
+                            </div>
+                            <div class="user-management">
+                                <h3>Управление пользователями</h3>
+                                <!-- Список пользователей будет добавлен динамически -->
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+                <!-- Карточки статистики -->
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <div class="card-icon"><i class="icon-tasks"></i></div>
+                        <div class="card-content">
+                            <h3>Активных задач</h3>
+                            <p class="stat-number">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Графики -->
+                <div class="charts-section">
+                    <div class="chart-container">
+                        <h3>Загрузка CPU</h3>
+                        <div id="cpu-chart"></div>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Использование памяти</h3>
+                        <div id="memory-chart"></div>
+                    </div>
+                </div>
+
+                <!-- Загрузка файлов -->
+                <div class="file-upload-section">
+                    <h3>Загрузка файлов</h3>
+                    <div class="upload-container">
+                        <div class="upload-area" id="upload-area">
+                            <div class="upload-icon">
+                                <i class="icon-upload"></i>
+                            </div>
+                            <p>Перетащите файлы сюда или нажмите для выбора</p>
+                            <input type="file" id="file-input" multiple accept=".txt,.csv,.xlsx,.pdf,.jpg,.png,.mp3,.mp4,.wav">
+                        </div>
+                        
+                        <!-- Список загруженных файлов -->
+                        <div class="uploaded-files" id="uploaded-files">
+                            <!-- Файлы будут добавляться динамически -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Системные события -->
+                <div class="events-section">
+                    <h3>Последние события</h3>
+                    <div class="events-list" id="events-list">
+                        <!-- События будут добавляться динамически -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Подключение скриптов -->
+        <script src="js/api.js"></script>
+        <script src="js/monitor.js"></script>
+        <script src="js/file-upload.js"></script>
+        <script src="js/pages.js"></script>
+        <script src="js/main.js"></script>
+        <script src="js/dashboard.js"></script>
+    </body>
+</html>

@@ -44,6 +44,7 @@ class ModelService(model_pb2_grpc.ModelServiceServicer):
             return model_pb2.GenerateResponse()
 
         try:
+            logger.info(f"Получен запрос на генерацию: {request.prompt}")
             logger.info(f"Генерация текста для: {request.prompt}")
             
             # Токенизация входного текста
@@ -62,27 +63,34 @@ class ModelService(model_pb2_grpc.ModelServiceServicer):
             # Декодирование ответа
             response_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
             
+            logger.info(f"Успешная генерация: {response_text}")
             logger.info(f"Сгенерированный текст: {response_text}")
             return model_pb2.GenerateResponse(text=response_text)
         
         except Exception as e:
-            logger.error(f"Ошибка при генерации: {str(e)}")
+            logger.error(f"Ошибка при генерации: {str(e)}", exc_info=True)
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(str(e))
             return model_pb2.GenerateResponse()
 
 def serve():
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=3))
-    model_pb2_grpc.add_ModelServiceServicer_to_server(ModelService(), server)
-    server.add_insecure_port("[::]:50051")
-    logger.info("Starting model server on port 50051...")
-    server.start()
-    
     try:
-        while True:
-            time.sleep(60 * 60 * 24)  # Сервер будет работать бесконечно
-    except KeyboardInterrupt:
-        server.stop(0)
+        server = grpc.server(futures.ThreadPoolExecutor(max_workers=3))
+        model_pb2_grpc.add_ModelServiceServicer_to_server(ModelService(), server)
+        server.add_insecure_port('[::]:50051')
+        server.start()
+        logger.info("gRPC сервер запущен на порту 50051")
+        server.wait_for_termination()
+    except Exception as e:
+        logger.error(f"Ошибка при запуске сервера: {str(e)}", exc_info=True)
+        raise
 
 if __name__ == '__main__':
+    try:
+        serve()
+    except KeyboardInterrupt:
+        logger.info("Сервер остановлен по запросу пользователя")
+    except Exception as e:
+        logger.error(f"Критическая ошибка: {str(e)}", exc_info=True)
+        raise
     serve()

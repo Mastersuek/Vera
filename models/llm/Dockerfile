@@ -54,6 +54,9 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser
 WORKDIR /app
 RUN mkdir -p /app/model && chown -R appuser:appuser /app
 
+# Создаем директорию для логов
+RUN mkdir -p /app/logs && chown -R appuser:appuser /app/logs
+
 # Копируем файлы из builder
 COPY --from=builder /app/model ./model
 COPY --from=builder /app/model_pb2.py ./model_pb2.py

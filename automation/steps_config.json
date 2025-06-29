@@ -1,0 +1,157 @@
+{
+    "steps": [
+        {
+            "name": "Network Configuration",
+            "description": "Настройка сети Docker",
+            "actions": [
+                {
+                    "type": "command",
+                    "name": "Create Network",
+                    "command": "docker network create --driver bridge --subnet 172.20.0.0/16 vera-network"
+                },
+                {
+                    "type": "command",
+                    "name": "Connect Services",
+                    "command": "docker network connect vera-network vera-postgres && docker network connect vera-network vera-redis"
+                }
+            ],
+            "checks": [
+                {
+                    "type": "command",
+                    "name": "Check Network",
+                    "command": "docker network ls | grep vera-network"
+                }
+            ]
+        },
+        {
+            "name": "PostgreSQL Setup",
+            "description": "Настройка PostgreSQL",
+            "actions": [
+                {
+                    "type": "command",
+                    "name": "Create User",
+                    "command": "docker exec vera-postgres psql -U postgres -c 'CREATE USER admin WITH PASSWORD 'admin';'"
+                },
+                {
+                    "type": "command",
+                    "name": "Create Database",
+                    "command": "docker exec vera-postgres psql -U postgres -c 'CREATE DATABASE vera;'"
+                },
+                {
+                    "type": "command",
+                    "name": "Grant Privileges",
+                    "command": "docker exec vera-postgres psql -U postgres -c 'GRANT ALL PRIVILEGES ON DATABASE vera TO admin;'"
+                }
+            ],
+            "checks": [
+                {
+                    "type": "command",
+                    "name": "Check Database",
+                    "command": "docker exec vera-postgres psql -U postgres -c 'SELECT datname FROM pg_database;'"
+                }
+            ]
+        },
+        {
+            "name": "Redis Setup",
+            "description": "Настройка Redis",
+            "actions": [
+                {
+                    "type": "command",
+                    "name": "Set Password",
+                    "command": "docker exec vera-redis redis-cli CONFIG SET requirepass admin"
+                },
+                {
+                    "type": "command",
+                    "name": "Set Persistence",
+                    "command": "docker exec vera-redis redis-cli CONFIG SET appendonly yes"
+                }
+            ],
+            "checks": [
+                {
+                    "type": "command",
+                    "name": "Check Redis",
+                    "command": "docker exec vera-redis redis-cli -a admin PING"
+                }
+            ]
+        },
+        {
+            "name": "Service Configuration",
+            "description": "Настройка сервисов",
+            "actions": [
+                {
+                    "type": "command",
+                    "name": "Update PostgreSQL Config",
+                    "command": "docker exec vera-postgres psql -U postgres -c 'ALTER USER postgres PASSWORD 'admin'; ALTER DATABASE postgres OWNER TO admin;'"
+                },
+                {
+                    "type": "command",
+                    "name": "Update Redis Config",
+                    "command": "docker exec vera-redis redis-cli CONFIG SET maxmemory 100mb"
+                }
+            ],
+            "checks": [
+                {
+                    "type": "command",
+                    "name": "Check PostgreSQL Config",
+                    "command": "docker exec vera-postgres psql -U postgres -c 'SELECT rolname FROM pg_roles;'"
+                },
+                {
+                    "type": "command",
+                    "name": "Check Redis Config",
+                    "command": "docker exec vera-redis redis-cli CONFIG GET maxmemory"
+                }
+            ]
+        },
+        {
+            "name": "Network Ports",
+            "description": "Настройка портов",
+            "actions": [
+                {
+                    "type": "command",
+                    "name": "Update PostgreSQL Port",
+                    "command": "docker exec vera-postgres psql -U postgres -c 'ALTER SYSTEM SET listen_addresses = '*'; ALTER SYSTEM SET port = 5432;'"
+                },
+                {
+                    "type": "command",
+                    "name": "Update Redis Port",
+                    "command": "docker exec vera-redis redis-cli CONFIG SET port 6379"
+                }
+            ],
+            "checks": [
+                {
+                    "type": "command",
+                    "name": "Check PostgreSQL Port",
+                    "command": "docker exec vera-postgres psql -U postgres -c 'SHOW port;'"
+                },
+                {
+                    "type": "command",
+                    "name": "Check Redis Port",
+                    "command": "docker exec vera-redis redis-cli CONFIG GET port"
+                }
+            ]
+        },
+        {
+            "name": "Final Check",
+            "description": "Финальная проверка",
+            "actions": [
+                {
+                    "type": "command",
+                    "name": "Test PostgreSQL Connection",
+                    "command": "docker exec vera-app python -c 'import psycopg2; conn = psycopg2.connect(host="vera-postgres", user="admin", password="admin", dbname="vera"); print("Connection successful")'"
+                },
+                {
+                    "type": "command",
+                    "name": "Test Redis Connection",
+                    "command": "docker exec vera-app python -c 'import redis; r = redis.Redis(host="vera-redis", port=6379, password="admin"); print("Connection successful")'"
+                }
+            ],
+            "checks": [
+                {
+                    "type": "command",
+                    "name": "Check App Health",
+                    "command": "curl -s http://localhost:8000/health"
+                }
+            ]
+        }
+    ]
+}

@@ -2,11 +2,10 @@
 FROM python:3.10-slim as builder
 
 # Install system dependencies
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
+    libmagic-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Create virtual environment
@@ -16,18 +15,16 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Install Python dependencies
 WORKDIR /app
 COPY requirements.txt .
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt -v
 
 # ===== RUNTIME STAGE =====
 FROM python:3.10-slim as production
 
 # Install runtime dependencies
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     libpq5 \
+    libmagic1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy virtual environment
@@ -60,3 +57,4 @@ EXPOSE 8000
 
 # Run application
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+

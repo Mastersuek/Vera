@@ -1,0 +1,63 @@
+{
+    "name": "Basic Automation Plan",
+    "version": "1.0",
+    "steps": [
+        {
+            "name": "Environment Check",
+            "description": "Проверка состояния окружения",
+            "actions": [
+                {
+                    "type": "command",
+                    "name": "Check Python version",
+                    "command": "python3 --version"
+                }
+            ],
+            "checks": [
+                {
+                    "type": "command",
+                    "name": "Check Docker status",
+                    "command": "docker --version"
+                }
+            ]
+        },
+        {
+            "name": "Service Status Check",
+            "description": "Проверка состояния сервисов",
+            "actions": [
+                {
+                    "type": "sleep",
+                    "name": "Wait for services",
+                    "duration": 5
+                }
+            ],
+            "checks": [
+                {
+                    "type": "service_status",
+                    "name": "Check PostgreSQL",
+                    "service": "postgres"
+                },
+                {
+                    "type": "service_status",
+                    "name": "Check Redis",
+                    "service": "redis"
+                }
+            ]
+        },
+        {
+            "name": "Basic Health Check",
+            "description": "Проверка базового здоровья системы",
+            "actions": [
+                {
+                    "type": "command",
+                    "name": "Check disk space",
+                    "command": "df -h"
+                },
+                {
+                    "type": "command",
+                    "name": "Check memory usage",
+                    "command": "free -h"
+                }
+            ]
+        }
+    ]
+}

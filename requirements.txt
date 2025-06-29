@@ -74,7 +74,7 @@ python-dateutil==2.9.0.post0
 python-dotenv==1.1.1
 python-jose==3.5.0
 python-magic==0.4.27
-python-magic-bin==0.4.14
+#python-magic-bin==0.4.14
 python-memcached==1.62
 python-multipart==0.0.20
 python-slugify==8.0.4

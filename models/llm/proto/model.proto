@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package model;
+
+// Сервис для работы с моделью
+service ModelService {
+    // Генерация текста
+    rpc Generate (GenerateRequest) returns (GenerateResponse);
+}
+
+// Запрос на генерацию
+message GenerateRequest {
+    string prompt = 1;         // Входной текст
+    int32 max_length = 2;      // Максимальная длина ответа
+    float temperature = 3;     // Температура генерации
+    float top_p = 4;           // Top-p sampling
+}
+
+// Ответ с результатом генерации
+message GenerateResponse {
+    string text = 1;           // Сгенерированный текст
+}

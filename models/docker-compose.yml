@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  bloom:
+    build:
+      context: ./llm
+      dockerfile: Dockerfile
+    ports:
+      - "50051:50051"
+      - "8000:8000"
+    environment:
+      - MODEL_NAME=bloom-560m
+    volumes:
+      - model_cache:/app/model
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  bart:
+    build:
+      context: ./classification
+      dockerfile: Dockerfile
+    ports:
+      - "50052:50051"
+      - "8001:8000"
+    environment:
+      - MODEL_NAME=bart-large-mnli
+    volumes:
+      - model_cache:/app/model
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  mpnet:
+    build:
+      context: ./embeddings
+      dockerfile: Dockerfile
+    ports:
+      - "50053:50051"
+      - "8002:8000"
+    environment:
+      - MODEL_NAME=all-mpnet-base-v2
+    volumes:
+      - model_cache:/app/model
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  model_cache:

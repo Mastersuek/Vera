@@ -1,0 +1,132 @@
+{
+    "name": "Vera Automation Plan",
+    "version": "1.0",
+    "steps": [
+        {
+            "name": "Environment Setup",
+            "description": "Настройка окружения",
+            "actions": [
+                {
+                    "type": "run_command",
+                    "command": "mkdir -p logs/automation"
+                },
+                {
+                    "type": "run_command",
+                    "command": "chmod +x scripts/auto_start.sh"
+                }
+            ],
+            "checks": [
+                {
+                    "type": "service_status",
+                    "service": "postgres"
+                },
+                {
+                    "type": "service_status",
+                    "service": "redis"
+                }
+            ]
+        },
+        {
+            "name": "Redis Testing",
+            "description": "Тестирование Redis",
+            "actions": [
+                {
+                    "type": "run_command",
+                    "command": "docker exec vera-redis redis-cli flushall"
+                }
+            ],
+            "checks": [
+                {
+                    "type": "connection",
+                    "host": "localhost",
+                    "port": 6379
+                },
+                {
+                    "type": "data_state",
+                    "source": "redis"
+                }
+            ]
+        },
+        {
+            "name": "PostgreSQL Testing",
+            "description": "Тестирование PostgreSQL",
+            "actions": [
+                {
+                    "type": "run_command",
+                    "command": "docker exec vera-postgres psql -U postgres -c 'DROP DATABASE IF EXISTS test;'"
+                },
+                {
+                    "type": "run_command",
+                    "command": "docker exec vera-postgres psql -U postgres -c 'CREATE DATABASE test;'"
+                }
+            ],
+            "checks": [
+                {
+                    "type": "connection",
+                    "host": "localhost",
+                    "port": 5432
+                },
+                {
+                    "type": "data_state",
+                    "source": "postgres"
+                }
+            ]
+        },
+        {
+            "name": "Service Restart Testing",
+            "description": "Тестирование перезапуска сервисов",
+            "actions": [
+                {
+                    "type": "restart_service",
+                    "service": "app"
+                },
+                {
+                    "type": "restart_service",
+                    "service": "redis"
+                },
+                {
+                    "type": "restart_service",
+                    "service": "postgres"
+                }
+            ],
+            "checks": [
+                {
+                    "type": "service_status",
+                    "service": "app"
+                },
+                {
+                    "type": "service_status",
+                    "service": "redis"
+                },
+                {
+                    "type": "service_status",
+                    "service": "postgres"
+                }
+            ]
+        },
+        {
+            "name": "Auto Recovery Testing",
+            "description": "Тестирование системы восстановления",
+            "actions": [
+                {
+                    "type": "run_command",
+                    "command": "python scripts/auto_recovery.py"
+                }
+            ],
+            "checks": [
+                {
+                    "type": "service_status",
+                    "service": "app"
+                },
+                {
+                    "type": "service_status",
+                    "service": "redis"
+                },
+                {
+                    "type": "service_status",
+                    "service": "postgres"
+                }
+            ]
+        }
+    ]
+}

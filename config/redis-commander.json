@@ -1,0 +1,16 @@
+{
+  "redis": {
+    "servers": [
+      {
+        "host": "redis",
+        "port": 6379,
+        "db": 0,
+        "name": "Redis",
+        "password": "15426378Rediska"
+      }
+    ]
+  },
+  "server": {
+    "port": 8081
+  }
+}
